@@ -1,90 +1,84 @@
-const { GraphQLObjectType, GraphQLSchema, GraphQLString, GraphQLID, GraphQLList, GraphQLNonNull } = require('graphql');
-const Task = require('../models/Task');
+const { GraphQLObjectType, GraphQLSchema, GraphQLString, GraphQLID, GraphQLList, GraphQLNonNull, GraphQLFloat } = require('graphql');
+const Product = require('../models/Product'); // Import the Product model
 
-// Update the TaskType to include taskId
-const TaskType = new GraphQLObjectType({
-    name: 'Task',
+// Define the ProductType
+const ProductType = new GraphQLObjectType({
+    name: 'Product',
     fields: () => ({
         id: { type: GraphQLID },
-        taskId: { type: GraphQLString },  // New field for custom task identifier
-        title: { type: GraphQLString },
+        name: { type: GraphQLString },
         description: { type: GraphQLString },
-        status: { type: GraphQLString },
-        createdAt: { type: GraphQLString },
+        price: { type: GraphQLFloat },
+        category: { type: GraphQLString },
     }),
 });
 
-// Update the RootQuery to include queries for taskId starting with '01'
+// Define the Root Query
 const RootQuery = new GraphQLObjectType({
     name: 'RootQueryType',
     fields: {
-        task: {
-            type: TaskType,
+        product: {
+            type: ProductType,
             args: { id: { type: GraphQLID } },
             resolve(parent, args) {
-                return Task.findById(args.id);
+                return Product.findById(args.id);
             },
         },
-        tasks: {
-            type: new GraphQLList(TaskType),
+        products: {
+            type: new GraphQLList(ProductType),
             resolve() {
-                return Task.find();
-            },
-        },
-        tasksWithPrefix: {  // New query to get tasks with taskId starting with '01'
-            type: new GraphQLList(TaskType),
-            args: { prefix: { type: GraphQLString } },
-            resolve(parent, args) {
-                return Task.find({ taskId: { $regex: '^' + args.prefix } }); // Filtering by prefix
+                return Product.find();
             },
         },
     },
 });
 
-// Update the Mutation to include taskId when adding tasks
+// Define the Mutations
 const Mutation = new GraphQLObjectType({
     name: 'Mutation',
     fields: {
-        addTask: {
-            type: TaskType,
+        addProduct: {
+            type: ProductType,
             args: {
-                taskId: { type: new GraphQLNonNull(GraphQLString) },  // Custom task ID
-                title: { type: new GraphQLNonNull(GraphQLString) },
-                description: { type: GraphQLString },
-                status: { type: GraphQLString },
+                name: { type: new GraphQLNonNull(GraphQLString) },
+                description: { type: new GraphQLNonNull(GraphQLString) },
+                price: { type: new GraphQLNonNull(GraphQLFloat) },
+                category: { type: new GraphQLNonNull(GraphQLString) },
             },
             resolve(parent, args) {
-                const task = new Task({
-                    taskId: args.taskId,  // Include taskId when saving
-                    title: args.title,
+                const product = new Product({
+                    name: args.name,
                     description: args.description,
-                    status: args.status,
+                    price: args.price,
+                    category: args.category,
                 });
-                return task.save();
+                return product.save();
             },
         },
-        deleteTask: {
-            type: TaskType,
+        deleteProduct: {
+            type: ProductType,
             args: { id: { type: new GraphQLNonNull(GraphQLID) } },
             resolve(parent, args) {
-                return Task.findByIdAndRemove(args.id);
+                return Product.findByIdAndRemove(args.id);
             },
         },
-        updateTask: {
-            type: TaskType,
+        updateProduct: {
+            type: ProductType,
             args: {
                 id: { type: new GraphQLNonNull(GraphQLID) },
-                title: { type: GraphQLString },
+                name: { type: GraphQLString },
                 description: { type: GraphQLString },
-                status: { type: GraphQLString },
+                price: { type: GraphQLFloat },
+                category: { type: GraphQLString },
             },
             resolve(parent, args) {
-                return Task.findByIdAndUpdate(args.id, args, { new: true });
+                return Product.findByIdAndUpdate(args.id, args, { new: true });
             },
         },
     },
 });
 
+// Export the schema
 module.exports = new GraphQLSchema({
     query: RootQuery,
     mutation: Mutation,
