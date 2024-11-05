@@ -1,9 +1,11 @@
-// Import necessary libraries
-require('dotenv').config();
+// Existing imports and configurations
 const express = require('express');
 const { graphqlHTTP } = require('express-graphql');
 const mongoose = require('mongoose');
 const schema = require('./schema'); // Assuming you have a GraphQL schema defined in 'schema.js'
+
+// Load environment variables from .env file
+require('dotenv').config();
 
 // Initialize the Express app
 const app = express();
@@ -11,13 +13,18 @@ const app = express();
 // Middleware to handle JSON requests
 app.use(express.json());
 
-// MongoDB connection URI from environment variables
+// MongoDB connection URI
 const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/task_management';
 
 // Connect to MongoDB Atlas
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('MongoDB connected...'))
   .catch(err => console.error('MongoDB connection error:', err));
+
+// Define a root route
+app.get('/', (req, res) => {
+  res.send('Welcome to the Task Management API! Use the /graphql endpoint to interact with the API.');
+});
 
 // Set up GraphQL endpoint
 app.use('/graphql', graphqlHTTP({
