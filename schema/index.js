@@ -67,7 +67,7 @@ const Mutation = new GraphQLObjectType({
       type: ProductType,
       args: { id: { type: new GraphQLNonNull(GraphQLID) } },
       resolve(parent, args) {
-        return Product.findByIdAndRemove(args.id);
+        return Product.findByIdAndDelete(args.id); // Changed to findByIdAndDelete
       },
     },
     updateProduct: {
@@ -78,13 +78,6 @@ const Mutation = new GraphQLObjectType({
         description: { type: GraphQLString },
         price: { type: GraphQLFloat },
         category: { type: GraphQLString },
-      },
-      deleteProduct: {
-        type: ProductType,
-        args: { id: { type: new GraphQLNonNull(GraphQLID) } },
-        resolve(parent, args) {
-          return Product.findByIdAndDelete(args.id); // Change to findByIdAndDelete
-        },
       },
       resolve(parent, args) {
         return Product.findByIdAndUpdate(args.id, args, { new: true });
